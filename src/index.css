@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+  background: #000;
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-snap-type: y proximity;
+  }
+}
+
+@media (max-width: 767px) {
+  html {
+    scroll-snap-type: none !important;
+  }
+}
+
+body {
+  background: #000;
+  color: #fafafa;
+  font-family: 'Sora', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+
+a, button {
+  touch-action: manipulation;
+}
+
+.text-gradient-teal {
+  background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Skills orbit rotations */
+@keyframes orbit-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes orbit-rotate-reverse {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+.orbit-ring {
+  animation: orbit-rotate 40s linear infinite;
+}
+.orbit-ring-slow {
+  animation: orbit-rotate 60s linear infinite;
+}
+.orbit-ring-fast {
+  animation: orbit-rotate 30s linear infinite;
+}
+.orbit-icon-counter {
+  animation: orbit-rotate-reverse 40s linear infinite;
+}
+.orbit-icon-counter-slow {
+  animation: orbit-rotate-reverse 60s linear infinite;
+}
+.orbit-icon-counter-fast {
+  animation: orbit-rotate-reverse 30s linear infinite;
+}
+
+/* Pause all orbit animations when the orbit container is being hovered */
+.orbit-paused .orbit-ring,
+.orbit-paused .orbit-ring-slow,
+.orbit-paused .orbit-ring-fast,
+.orbit-paused .orbit-icon-counter,
+.orbit-paused .orbit-icon-counter-slow,
+.orbit-paused .orbit-icon-counter-fast {
+  animation-play-state: paused;
+}
+
+/* Loading bar */
+.load-bar-track {
+  background: #0a0a0a;
+}
+.load-bar-fill {
+  background: linear-gradient(90deg, #00d4aa, #00b894);
+}
