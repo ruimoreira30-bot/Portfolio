@@ -15,7 +15,11 @@ export default function Hero({ frames }) {
 
   const wrapperRef = useRef(null)
   const canvasRef = useRef(null)
+  const canvasWrapRef = useRef(null)
   const blockRefs = useRef([])
+  const progressRefs = useRef([])
+  const ctaRef = useRef(null)
+  const eyebrowRef = useRef(null)
 
   // Refs that avoid React re-renders during scroll
   const ctxRef = useRef(null)
@@ -23,7 +27,6 @@ export default function Hero({ frames }) {
   const currentFrameRef = useRef(0)
   const rafPendingRef = useRef(false)
 
-  // Recompute the destination rectangle for the current canvas + first frame size
   const recomputeRect = () => {
     const canvas = canvasRef.current
     if (!canvas || !frames.length) return
@@ -47,7 +50,6 @@ export default function Hero({ frames }) {
     rectRef.current = { dx, dy, dw, dh, cw, ch }
   }
 
-  // Direct canvas draw — bypasses React render entirely
   const drawFrame = (idx) => {
     const ctx = ctxRef.current
     const { dx, dy, dw, dh, cw, ch } = rectRef.current
@@ -57,7 +59,6 @@ export default function Hero({ frames }) {
     ctx.clearRect(0, 0, cw, ch)
     ctx.drawImage(img, dx, dy, dw, dh)
 
-    // Global dark overlay for text legibility
     ctx.fillStyle = 'rgba(0,0,0,0.55)'
     ctx.fillRect(0, 0, cw, ch)
 
@@ -74,7 +75,6 @@ export default function Hero({ frames }) {
     ctx.fillRect(gx, gy, maskW, maskH)
   }
 
-  // Schedule one draw per animation frame, even if onUpdate fires more often
   const scheduleDraw = (idx) => {
     currentFrameRef.current = idx
     if (rafPendingRef.current) return
@@ -85,7 +85,6 @@ export default function Hero({ frames }) {
     })
   }
 
-  // Size + cache context before first paint
   useLayoutEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -111,7 +110,6 @@ export default function Hero({ frames }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [frames])
 
-  // Initial draw once frames are available
   useEffect(() => {
     if (frames.length) {
       recomputeRect()
@@ -120,7 +118,33 @@ export default function Hero({ frames }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [frames])
 
-  // Frame scrub + block crossfade timeline
+  // Initial mount entrance — premium reveal
+  useEffect(() => {
+    if (!frames.length) return
+    const block0Children = Array.from(blockRefs.current[0].children)
+    const entryElements = [
+      eyebrowRef.current,
+      ...block0Children,
+      ctaRef.current
+    ].filter(Boolean)
+
+    gsap.set(entryElements, { opacity: 0, y: 30 })
+    gsap.fromTo(
+      canvasWrapRef.current,
+      { scale: 1.08 },
+      { scale: 1, duration: 1.6, ease: 'power3.out' }
+    )
+    gsap.to(entryElements, {
+      opacity: 1,
+      y: 0,
+      duration: 1.3,
+      stagger: 0.1,
+      ease: 'expo.out',
+      delay: 0.15
+    })
+  }, [frames])
+
+  // Frame scrub + staggered block transitions
   useEffect(() => {
     if (!frames.length) return
     const isMobile = window.matchMedia('(max-width: 767px)').matches
@@ -136,12 +160,25 @@ export default function Hero({ frames }) {
       }
     })
 
-    const blocks = blockRefs.current
-    gsap.set(blocks, { opacity: 0, y: -100 })
-    gsap.set(blocks[0], { opacity: 1, y: 0 })
+    // Collect each block's child elements (title / subtitle / desc / flags?)
+    const blockChildren = blockRefs.current.map((b) => Array.from(b.children))
+
+    // Initial state: block 0 children visible, others hidden below
+    blockChildren.forEach((children, i) => {
+      if (i === 0) {
+        gsap.set(children, { opacity: 1, y: 0 })
+      } else {
+        gsap.set(children, { opacity: 0, y: 40 })
+      }
+    })
+
+    // Progress bar segments
+    progressRefs.current.forEach((el, i) => {
+      if (!el) return
+      gsap.set(el, { scaleX: i === 0 ? 0 : 0, transformOrigin: 'left center' })
+    })
 
     const tl = gsap.timeline({
-      defaults: { ease: 'power2.inOut' },
       scrollTrigger: {
         trigger: wrapperRef.current,
         start: 'top top',
@@ -152,19 +189,62 @@ export default function Hero({ frames }) {
     tl.to({}, { duration: 1 }, 0)
 
     const TRANSITIONS = [0.25, 0.5, 0.75]
-    const DURATION = 0.08
+    const ENTER_DURATION = 0.14
+    const EXIT_DURATION = 0.08
+    const STAGGER = 0.018
 
-    TRANSITIONS.forEach((t, i) => {
-      tl.to(
-        blocks[i],
-        { opacity: 0, y: 100, duration: DURATION },
-        t - DURATION / 2
-      )
+    TRANSITIONS.forEach((tPos, i) => {
+      const exiting = blockChildren[i]
+      const entering = blockChildren[i + 1]
+
+      // Exit: stagger up + fade
+      exiting.forEach((child, ci) => {
+        tl.to(
+          child,
+          {
+            opacity: 0,
+            y: -20,
+            duration: EXIT_DURATION,
+            ease: 'power3.in'
+          },
+          tPos - EXIT_DURATION + ci * STAGGER * 0.6
+        )
+      })
+
+      // Enter: stagger from bottom + fade in
+      entering.forEach((child, ci) => {
+        tl.fromTo(
+          child,
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: ENTER_DURATION,
+            ease: 'expo.out'
+          },
+          tPos + ci * STAGGER
+        )
+      })
+
+      // Subtle canvas zoom on the transition — adds depth
       tl.fromTo(
-        blocks[i + 1],
-        { opacity: 0, y: -100 },
-        { opacity: 1, y: 0, duration: DURATION },
-        t - DURATION / 2
+        canvasWrapRef.current,
+        { scale: 1.06 },
+        { scale: 1, duration: 0.25, ease: 'power2.out' },
+        tPos - 0.02
+      )
+    })
+
+    // Progress bar — fill each segment proportionally to scroll progress
+    progressRefs.current.forEach((el, i) => {
+      if (!el) return
+      const segStart = i * 0.25
+      const segEnd = (i + 1) * 0.25
+      tl.fromTo(
+        el,
+        { scaleX: 0 },
+        { scaleX: 1, duration: segEnd - segStart, ease: 'none' },
+        segStart
       )
     })
 
@@ -185,11 +265,21 @@ export default function Hero({ frames }) {
       style={{ height: '400vh' }}
     >
       <div className="sticky top-0 h-screen w-full bg-black overflow-hidden">
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+        <div
+          ref={canvasWrapRef}
+          className="absolute inset-0 w-full h-full"
+          style={{ willChange: 'transform' }}
+        >
+          <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+        </div>
 
         <div className="relative z-10 h-full max-w-7xl mx-auto px-6 md:pl-20 md:pr-10 grid grid-cols-12 items-center">
           <div className="col-span-12 md:col-span-6 lg:col-span-5 relative text-center md:text-left">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-teal mb-8 justify-center md:justify-start">
+            <div
+              ref={eyebrowRef}
+              className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-teal mb-8 justify-center md:justify-start"
+              style={{ willChange: 'transform, opacity' }}
+            >
               <span className="w-8 h-px bg-teal" />
               {t.hero.eyebrow}
             </div>
@@ -200,25 +290,36 @@ export default function Hero({ frames }) {
                   key={i}
                   ref={(el) => (blockRefs.current[i] = el)}
                   className="absolute inset-0 flex flex-col gap-4"
-                  style={{ willChange: 'transform, opacity' }}
                 >
                   <h1
                     className="font-display font-bold text-5xl md:text-6xl lg:text-7xl leading-[0.95] text-white"
-                    style={{ whiteSpace: 'pre-line' }}
+                    style={{
+                      whiteSpace: 'pre-line',
+                      willChange: 'transform, opacity'
+                    }}
                   >
                     {b.title}
                   </h1>
-                  <p className="font-sans text-lg md:text-xl text-gradient-teal font-medium leading-relaxed">
+                  <p
+                    className="font-sans text-lg md:text-xl text-gradient-teal font-medium leading-relaxed"
+                    style={{ willChange: 'transform, opacity' }}
+                  >
                     {b.subtitle}
                   </p>
                   <p
                     className="font-sans text-sm md:text-base text-neutral-300 max-w-md leading-relaxed mx-auto md:mx-0"
-                    style={{ whiteSpace: 'pre-line' }}
+                    style={{
+                      whiteSpace: 'pre-line',
+                      willChange: 'transform, opacity'
+                    }}
                   >
                     {b.description}
                   </p>
                   {b.flags && (
-                    <div className="flex gap-3 mt-3 justify-center md:justify-start">
+                    <div
+                      className="flex gap-3 mt-3 justify-center md:justify-start"
+                      style={{ willChange: 'transform, opacity' }}
+                    >
                       {b.flags.map((f) => (
                         <div
                           key={f.code}
@@ -244,7 +345,11 @@ export default function Hero({ frames }) {
               ))}
             </div>
 
-            <div className="flex gap-3 pt-8 justify-center md:justify-start">
+            <div
+              ref={ctaRef}
+              className="flex gap-3 pt-8 justify-center md:justify-start"
+              style={{ willChange: 'transform, opacity' }}
+            >
               <a
                 href="#project"
                 className="px-5 py-3 bg-teal text-black text-xs uppercase tracking-[0.2em] font-semibold rounded-full hover:bg-teal-dark transition-colors"
@@ -261,13 +366,23 @@ export default function Hero({ frames }) {
           </div>
         </div>
 
+        {/* Progress bar — synced to scroll position */}
         <div className="absolute bottom-6 left-0 right-0 z-10 flex justify-center">
           <div className="flex items-center gap-2">
             {BLOCKS.map((_, i) => (
               <div
                 key={i}
-                className="w-8 h-px bg-white/20 overflow-hidden relative"
-              />
+                className="relative w-10 h-px bg-white/15 overflow-hidden"
+              >
+                <div
+                  ref={(el) => (progressRefs.current[i] = el)}
+                  className="absolute inset-0 bg-teal"
+                  style={{
+                    transformOrigin: 'left center',
+                    boxShadow: '0 0 8px rgba(0,212,170,0.7)'
+                  }}
+                />
+              </div>
             ))}
           </div>
         </div>
