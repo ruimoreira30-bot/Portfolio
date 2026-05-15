@@ -145,7 +145,7 @@ function Ring({ items, radius, ringClass, counterClass, onItemHover, onItemLeave
               onTouchStart={() => onItemHover && onItemHover(it)}
             >
               <div
-                className="relative w-11 h-11 md:w-16 md:h-16 rounded-xl bg-charcoal border border-white/10 flex items-center justify-center overflow-hidden group-hover:border-teal group-hover:scale-110 group-hover:shadow-[0_0_28px_#00d4aa88] transition-all duration-300"
+                className="relative w-11 h-11 md:w-14 md:h-14 rounded-xl bg-charcoal border border-white/10 flex items-center justify-center overflow-hidden group-hover:border-teal group-hover:scale-110 group-hover:shadow-[0_0_28px_#00d4aa88] transition-all duration-300"
               >
                 {/* Subtle radial teal glow behind icon */}
                 <span
@@ -285,7 +285,7 @@ export default function SkillsOrbit() {
       </div>
 
       <div
-        className={`relative z-10 md:w-[640px] md:h-[640px] ${activeSkill ? 'orbit-paused' : ''}`}
+        className={`relative z-10 md:w-[540px] md:h-[540px] ${activeSkill ? 'orbit-paused' : ''}`}
         style={{
           width: 'min(92vw, 360px)',
           height: 'min(92vw, 360px)'
@@ -365,9 +365,9 @@ export default function SkillsOrbit() {
           <Ring items={outerLocalized} radius={145} ringClass="orbit-ring-fast" counterClass="orbit-icon-counter-fast" onItemHover={onItemHover} onItemLeave={onItemLeave} />
         </div>
         <div className="hidden md:block absolute inset-0">
-          <Ring items={innerLocalized} radius={120} ringClass="orbit-ring-slow" counterClass="orbit-icon-counter-slow" onItemHover={onItemHover} onItemLeave={onItemLeave} />
-          <Ring items={middleLocalized} radius={205} ringClass="orbit-ring" counterClass="orbit-icon-counter" onItemHover={onItemHover} onItemLeave={onItemLeave} />
-          <Ring items={outerLocalized} radius={290} ringClass="orbit-ring-fast" counterClass="orbit-icon-counter-fast" onItemHover={onItemHover} onItemLeave={onItemLeave} />
+          <Ring items={innerLocalized} radius={95} ringClass="orbit-ring-slow" counterClass="orbit-icon-counter-slow" onItemHover={onItemHover} onItemLeave={onItemLeave} />
+          <Ring items={middleLocalized} radius={170} ringClass="orbit-ring" counterClass="orbit-icon-counter" onItemHover={onItemHover} onItemLeave={onItemLeave} />
+          <Ring items={outerLocalized} radius={240} ringClass="orbit-ring-fast" counterClass="orbit-icon-counter-fast" onItemHover={onItemHover} onItemLeave={onItemLeave} />
         </div>
       </div>
     </section>
