@@ -55,7 +55,7 @@ const en = {
       {
         role: 'Founder & AI Strategist',
         company: 'ImportaSeguro',
-        tag: 'Side Project',
+        tag: 'Founder Project',
         url: 'importaseguro.pt',
         period: 'JAN 2026 — PRESENT',
         intro:
@@ -171,7 +171,7 @@ const en = {
           { value: 'Multi-Agent', label: 'Architecture' },
           { value: 'Instant PDF', label: 'Output' }
         ],
-        ctaLabel: 'View Demo'
+        ctaLabel: 'Request Demo'
       }
     ]
   },
@@ -243,7 +243,7 @@ const fr = {
       {
         role: 'Fondateur & AI Strategist',
         company: 'ImportaSeguro',
-        tag: 'Side Project',
+        tag: 'Founder Project',
         url: 'importaseguro.pt',
         period: 'JAN 2026 — AUJOURD’HUI',
         intro:
@@ -359,7 +359,7 @@ const fr = {
           { value: 'Multi-agent', label: 'Architecture' },
           { value: 'PDF instantané', label: 'Output' }
         ],
-        ctaLabel: 'Voir la Démo'
+        ctaLabel: 'Demander une démo'
       }
     ]
   },
@@ -431,7 +431,7 @@ const pt = {
       {
         role: 'Founder & AI Strategist',
         company: 'ImportaSeguro',
-        tag: 'Side Project',
+        tag: 'Founder Project',
         url: 'importaseguro.pt',
         period: 'JAN 2026 — PRESENTE',
         intro:
@@ -547,7 +547,7 @@ const pt = {
           { value: 'Multi-agente', label: 'Arquitetura' },
           { value: 'PDF instantâneo', label: 'Output' }
         ],
-        ctaLabel: 'Ver Demo'
+        ctaLabel: 'Pedir Demo'
       }
     ]
   },

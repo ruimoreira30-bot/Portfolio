@@ -36,8 +36,8 @@ const PROJECT_META = [
   {
     id: 'proposal-engine',
     icon: Sparkles,
-    href: 'https://importaseguro.pt',
-    disabled: false,
+    href: '#contact',
+    disabled: true,
     metricsAnimate: ['text', 'text']
   }
 ]

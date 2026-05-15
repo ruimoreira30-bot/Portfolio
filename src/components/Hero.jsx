@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useTranslation } from '../i18n/LanguageContext.jsx'
@@ -12,22 +12,24 @@ if (typeof window !== 'undefined' && import.meta.env.DEV) {
 export default function Hero({ frames }) {
   const { t } = useTranslation()
   const BLOCKS = t.hero.blocks
+
   const wrapperRef = useRef(null)
   const canvasRef = useRef(null)
   const blockRefs = useRef([])
-  const [frameIdx, setFrameIdx] = useState(0)
-  // eslint-disable-next-line no-unused-vars
-  const [resizeTick, setResizeTick] = useState(0)
 
-  useEffect(() => {
+  // Refs that avoid React re-renders during scroll
+  const ctxRef = useRef(null)
+  const rectRef = useRef({ dx: 0, dy: 0, dw: 0, dh: 0, cw: 0, ch: 0 })
+  const currentFrameRef = useRef(0)
+  const rafPendingRef = useRef(false)
+
+  // Recompute the destination rectangle for the current canvas + first frame size
+  const recomputeRect = () => {
     const canvas = canvasRef.current
     if (!canvas || !frames.length) return
-    const ctx = canvas.getContext('2d')
-    const img = frames[Math.min(frameIdx, frames.length - 1)]
-    if (!img) return
+    const img = frames[0]
     const cw = canvas.width
     const ch = canvas.height
-    if (cw === 0 || ch === 0) return
     const ir = img.width / img.height
     const cr = cw / ch
     let dw, dh, dx, dy
@@ -42,51 +44,84 @@ export default function Hero({ frames }) {
       dx = 0
       dy = (ch - dh) / 2
     }
+    rectRef.current = { dx, dy, dw, dh, cw, ch }
+  }
+
+  // Direct canvas draw — bypasses React render entirely
+  const drawFrame = (idx) => {
+    const ctx = ctxRef.current
+    const { dx, dy, dw, dh, cw, ch } = rectRef.current
+    if (!ctx || cw === 0 || ch === 0) return
+    const img = frames[Math.min(idx, frames.length - 1)]
+    if (!img) return
     ctx.clearRect(0, 0, cw, ch)
     ctx.drawImage(img, dx, dy, dw, dh)
     ctx.fillStyle = 'rgba(0,0,0,0.55)'
     ctx.fillRect(0, 0, cw, ch)
-  }, [frameIdx, frames, resizeTick])
+  }
 
-  // Size the canvas before first paint so the first drawn frame is full-resolution
+  // Schedule one draw per animation frame, even if onUpdate fires more often
+  const scheduleDraw = (idx) => {
+    currentFrameRef.current = idx
+    if (rafPendingRef.current) return
+    rafPendingRef.current = true
+    requestAnimationFrame(() => {
+      rafPendingRef.current = false
+      drawFrame(currentFrameRef.current)
+    })
+  }
+
+  // Size + cache context before first paint
   useLayoutEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
+    ctxRef.current = canvas.getContext('2d', { alpha: false })
+
     const sizeCanvas = () => {
-      const dpr = window.devicePixelRatio || 1
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
       canvas.width = window.innerWidth * dpr
       canvas.height = window.innerHeight * dpr
       canvas.style.width = window.innerWidth + 'px'
       canvas.style.height = window.innerHeight + 'px'
+      recomputeRect()
+      drawFrame(currentFrameRef.current)
     }
     sizeCanvas()
+
     const onResize = () => {
       sizeCanvas()
-      // Increment counter to force redraw with new size
-      setResizeTick((n) => n + 1)
-      if (typeof ScrollTrigger?.refresh === 'function') ScrollTrigger.refresh()
+      ScrollTrigger.refresh()
     }
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frames])
 
-  // Frame scrub + scroll-driven block timeline
+  // Initial draw once frames are available
   useEffect(() => {
+    if (frames.length) {
+      recomputeRect()
+      drawFrame(0)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frames])
+
+  // Frame scrub + block crossfade timeline
+  useEffect(() => {
+    if (!frames.length) return
     const isMobile = window.matchMedia('(max-width: 767px)').matches
 
-    // Frame scrub trigger
     const frameST = ScrollTrigger.create({
       trigger: wrapperRef.current,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: isMobile ? 0.5 : 1,
+      scrub: isMobile ? 0.4 : 0.8,
       onUpdate: (self) => {
         const idx = Math.round(self.progress * (frames.length - 1))
-        setFrameIdx(idx)
+        scheduleDraw(idx)
       }
     })
 
-    // Block crossfade timeline (scrubbed). Each block hidden by default.
     const blocks = blockRefs.current
     gsap.set(blocks, { opacity: 0, y: -100 })
     gsap.set(blocks[0], { opacity: 1, y: 0 })
@@ -97,16 +132,11 @@ export default function Hero({ frames }) {
         trigger: wrapperRef.current,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: isMobile ? 0.5 : 1
+        scrub: isMobile ? 0.4 : 0.8
       }
     })
-
-    // Force timeline duration to exactly 1.0 so positions == scroll progress.
     tl.to({}, { duration: 1 }, 0)
 
-    // 3 transitions at 25%, 50%, 75%. Each transition lasts 0.08 (8% of scroll).
-    // Exit (current block: y 0→100, opacity 1→0) and enter (next block: y -100→0, opacity 0→1)
-    // run SIMULTANEOUSLY so there is no overlap of two fully-opaque blocks.
     const TRANSITIONS = [0.25, 0.5, 0.75]
     const DURATION = 0.08
 
@@ -124,7 +154,6 @@ export default function Hero({ frames }) {
       )
     })
 
-    // After triggers are set, refresh in case scroll position was already past start
     ScrollTrigger.refresh()
 
     return () => {
@@ -146,13 +175,11 @@ export default function Hero({ frames }) {
 
         <div className="relative z-10 h-full max-w-7xl mx-auto px-6 md:pl-20 md:pr-10 grid grid-cols-12 items-center">
           <div className="col-span-12 md:col-span-6 lg:col-span-5 relative text-center md:text-left">
-            {/* Static eyebrow */}
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-teal mb-8 justify-center md:justify-start">
               <span className="w-8 h-px bg-teal" />
               {t.hero.eyebrow}
             </div>
 
-            {/* Stacked blocks */}
             <div className="relative min-h-[340px] md:min-h-[380px]">
               {BLOCKS.map((b, i) => (
                 <div
@@ -203,7 +230,6 @@ export default function Hero({ frames }) {
               ))}
             </div>
 
-            {/* Static CTAs */}
             <div className="flex gap-3 pt-8 justify-center md:justify-start">
               <a
                 href="#project"
@@ -213,7 +239,7 @@ export default function Hero({ frames }) {
               </a>
               <a
                 href="#contact"
-                className="px-5 py-3 border border-white/20 text-white text-xs uppercase tracking-[0.2em] font-semibold rounded-full hover:border-teal hover:text-teal transition-colors"
+                className="px-5 py-3 border-2 border-white/40 text-white text-xs uppercase tracking-[0.2em] font-semibold rounded-full hover:border-teal hover:text-teal hover:bg-white/[0.04] transition-all backdrop-blur-sm bg-black/20"
               >
                 {t.hero.contact}
               </a>
@@ -221,26 +247,13 @@ export default function Hero({ frames }) {
           </div>
         </div>
 
-        {/* Progress indicator */}
         <div className="absolute bottom-6 left-0 right-0 z-10 flex justify-center">
           <div className="flex items-center gap-2">
             {BLOCKS.map((_, i) => (
               <div
                 key={i}
                 className="w-8 h-px bg-white/20 overflow-hidden relative"
-              >
-                <div
-                  className="absolute inset-0 bg-teal origin-left transition-transform duration-300"
-                  style={{
-                    transform: `scaleX(${
-                      Math.max(
-                        0,
-                        Math.min(1, (frameIdx / (frames.length - 1)) * 4 - i)
-                      )
-                    })`
-                  }}
-                />
-              </div>
+              />
             ))}
           </div>
         </div>

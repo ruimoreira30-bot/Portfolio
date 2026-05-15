@@ -145,7 +145,7 @@ function Ring({ items, radius, ringClass, counterClass, onItemHover, onItemLeave
               onTouchStart={() => onItemHover && onItemHover(it)}
             >
               <div
-                className="relative w-14 h-14 md:w-16 md:h-16 rounded-xl bg-charcoal border border-white/10 flex items-center justify-center overflow-hidden group-hover:border-teal group-hover:scale-110 group-hover:shadow-[0_0_28px_#00d4aa88] transition-all duration-300"
+                className="relative w-11 h-11 md:w-16 md:h-16 rounded-xl bg-charcoal border border-white/10 flex items-center justify-center overflow-hidden group-hover:border-teal group-hover:scale-110 group-hover:shadow-[0_0_28px_#00d4aa88] transition-all duration-300"
               >
                 {/* Subtle radial teal glow behind icon */}
                 <span
@@ -278,11 +278,19 @@ export default function SkillsOrbit() {
           ref={subtitleRef}
           className="text-neutral-400 mt-4 text-sm md:text-base max-w-xl mx-auto"
         >
-          {t.skills.subtitle}
+          {/* CSS swaps Hover/Tap copy automatically depending on input device */}
+          <span className="hover-copy">{t.skills.subtitle}</span>
+          <span className="tap-copy">{t.skills.subtitleTouch || t.skills.subtitle.replace(/Hover/i, 'Tap').replace(/Passa o rato em/i, 'Toca em').replace(/Survolez/i, 'Touchez')}</span>
         </p>
       </div>
 
-      <div className={`relative z-10 w-[360px] h-[360px] md:w-[720px] md:h-[720px] ${activeSkill ? 'orbit-paused' : ''}`}>
+      <div
+        className={`relative z-10 md:w-[720px] md:h-[720px] ${activeSkill ? 'orbit-paused' : ''}`}
+        style={{
+          width: 'min(92vw, 360px)',
+          height: 'min(92vw, 360px)'
+        }}
+      >
         {/* Center */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
           <div className="relative w-20 h-20 md:w-28 md:h-28">
@@ -352,9 +360,9 @@ export default function SkillsOrbit() {
 
         {/* Mobile uses smaller radii */}
         <div className="md:hidden absolute inset-0">
-          <Ring items={innerLocalized} radius={70} ringClass="orbit-ring-slow" counterClass="orbit-icon-counter-slow" onItemHover={onItemHover} onItemLeave={onItemLeave} />
-          <Ring items={middleLocalized} radius={115} ringClass="orbit-ring" counterClass="orbit-icon-counter" onItemHover={onItemHover} onItemLeave={onItemLeave} />
-          <Ring items={outerLocalized} radius={170} ringClass="orbit-ring-fast" counterClass="orbit-icon-counter-fast" onItemHover={onItemHover} onItemLeave={onItemLeave} />
+          <Ring items={innerLocalized} radius={60} ringClass="orbit-ring-slow" counterClass="orbit-icon-counter-slow" onItemHover={onItemHover} onItemLeave={onItemLeave} />
+          <Ring items={middleLocalized} radius={100} ringClass="orbit-ring" counterClass="orbit-icon-counter" onItemHover={onItemHover} onItemLeave={onItemLeave} />
+          <Ring items={outerLocalized} radius={145} ringClass="orbit-ring-fast" counterClass="orbit-icon-counter-fast" onItemHover={onItemHover} onItemLeave={onItemLeave} />
         </div>
         <div className="hidden md:block absolute inset-0">
           <Ring items={innerLocalized} radius={140} ringClass="orbit-ring-slow" counterClass="orbit-icon-counter-slow" onItemHover={onItemHover} onItemLeave={onItemLeave} />

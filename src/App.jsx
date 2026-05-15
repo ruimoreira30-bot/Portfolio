@@ -15,20 +15,49 @@ export default function App() {
   const [frames, setFrames] = useState([])
 
   useEffect(() => {
+    let cancelled = false
     let loaded = 0
-    const imgs = []
-    for (let i = 1; i <= TOTAL_FRAMES; i++) {
-      const img = new Image()
-      img.src = framePath(i)
-      img.onload = img.onerror = () => {
-        loaded++
-        setProgress(loaded / TOTAL_FRAMES)
-        if (loaded === TOTAL_FRAMES) {
-          setFrames(imgs)
-          setReady(true)
-        }
+    const imgs = new Array(TOTAL_FRAMES)
+
+    const finish = () => {
+      if (cancelled) return
+      loaded++
+      setProgress(loaded / TOTAL_FRAMES)
+      if (loaded === TOTAL_FRAMES) {
+        setFrames(imgs)
+        setReady(true)
       }
-      imgs.push(img)
+    }
+
+    const supportsBitmap = typeof window !== 'undefined' && 'createImageBitmap' in window
+
+    for (let i = 1; i <= TOTAL_FRAMES; i++) {
+      const url = framePath(i)
+      const slot = i - 1
+      const img = new Image()
+      img.decoding = 'async'
+      img.src = url
+      img.onload = async () => {
+        if (cancelled) return
+        if (supportsBitmap) {
+          try {
+            const bitmap = await createImageBitmap(img)
+            imgs[slot] = bitmap
+          } catch {
+            imgs[slot] = img
+          }
+        } else {
+          imgs[slot] = img
+        }
+        finish()
+      }
+      img.onerror = () => {
+        imgs[slot] = img
+        finish()
+      }
+    }
+    return () => {
+      cancelled = true
     }
   }, [])
 
@@ -54,8 +83,8 @@ export default function App() {
       <main className="md:snap-y md:snap-mandatory">
         <Hero frames={frames} />
         <Experience />
-        <SkillsOrbit />
         <Project />
+        <SkillsOrbit />
         <Contact />
       </main>
     </>
