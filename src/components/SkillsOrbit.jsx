@@ -262,7 +262,7 @@ export default function SkillsOrbit() {
     <section
       id="skills"
       ref={sectionRef}
-      className="relative md:snap-start min-h-screen py-20 md:py-24 px-6 md:px-10 flex flex-col items-center justify-start md:justify-center overflow-hidden"
+      className="relative md:snap-start min-h-screen py-20 md:py-28 px-6 md:px-10 flex flex-col items-center justify-start overflow-hidden"
       style={{ background: '#04050c' }}
     >
       <Starfield />
