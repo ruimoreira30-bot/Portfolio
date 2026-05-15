@@ -262,11 +262,11 @@ export default function SkillsOrbit() {
     <section
       id="skills"
       ref={sectionRef}
-      className="relative md:snap-start min-h-screen py-24 md:py-32 px-6 md:px-10 flex flex-col items-center justify-center overflow-hidden"
+      className="relative md:snap-start min-h-screen py-20 md:py-24 px-6 md:px-10 flex flex-col items-center justify-start md:justify-center overflow-hidden"
       style={{ background: '#04050c' }}
     >
       <Starfield />
-      <div className="relative z-10 text-center mb-12 md:mb-16">
+      <div className="relative z-10 text-center mb-10 md:mb-12 max-w-3xl">
         <h2
           ref={titleRef}
           className="font-display font-bold text-4xl md:text-6xl tracking-tight"
@@ -285,7 +285,7 @@ export default function SkillsOrbit() {
       </div>
 
       <div
-        className={`relative z-10 md:w-[720px] md:h-[720px] ${activeSkill ? 'orbit-paused' : ''}`}
+        className={`relative z-10 md:w-[640px] md:h-[640px] ${activeSkill ? 'orbit-paused' : ''}`}
         style={{
           width: 'min(92vw, 360px)',
           height: 'min(92vw, 360px)'
@@ -365,9 +365,9 @@ export default function SkillsOrbit() {
           <Ring items={outerLocalized} radius={145} ringClass="orbit-ring-fast" counterClass="orbit-icon-counter-fast" onItemHover={onItemHover} onItemLeave={onItemLeave} />
         </div>
         <div className="hidden md:block absolute inset-0">
-          <Ring items={innerLocalized} radius={140} ringClass="orbit-ring-slow" counterClass="orbit-icon-counter-slow" onItemHover={onItemHover} onItemLeave={onItemLeave} />
-          <Ring items={middleLocalized} radius={230} ringClass="orbit-ring" counterClass="orbit-icon-counter" onItemHover={onItemHover} onItemLeave={onItemLeave} />
-          <Ring items={outerLocalized} radius={340} ringClass="orbit-ring-fast" counterClass="orbit-icon-counter-fast" onItemHover={onItemHover} onItemLeave={onItemLeave} />
+          <Ring items={innerLocalized} radius={120} ringClass="orbit-ring-slow" counterClass="orbit-icon-counter-slow" onItemHover={onItemHover} onItemLeave={onItemLeave} />
+          <Ring items={middleLocalized} radius={205} ringClass="orbit-ring" counterClass="orbit-icon-counter" onItemHover={onItemHover} onItemLeave={onItemLeave} />
+          <Ring items={outerLocalized} radius={290} ringClass="orbit-ring-fast" counterClass="orbit-icon-counter-fast" onItemHover={onItemHover} onItemLeave={onItemLeave} />
         </div>
       </div>
     </section>

@@ -53,9 +53,9 @@ const en = {
       'Over the last two years I built product, closed partnerships, and automated everything I could. Automotive, social impact, and AI.',
     items: [
       {
-        role: 'Founder & AI Strategist',
+        role: 'Founder',
         company: 'ImportaSeguro',
-        tag: 'Founder Project',
+        tag: 'Side Project',
         url: 'importaseguro.pt',
         period: 'JAN 2026 — PRESENT',
         intro:
@@ -241,9 +241,9 @@ const fr = {
       "Ces deux dernières années, j'ai construit du produit, signé des partenariats et automatisé tout ce qui pouvait l'être. Automobile, impact social et IA.",
     items: [
       {
-        role: 'Fondateur & AI Strategist',
+        role: 'Fondateur',
         company: 'ImportaSeguro',
-        tag: 'Founder Project',
+        tag: 'Side Project',
         url: 'importaseguro.pt',
         period: 'JAN 2026 — AUJOURD’HUI',
         intro:
@@ -429,9 +429,9 @@ const pt = {
       'Nos últimos dois anos construí produto, fechei parcerias e automatizei tudo o que se podia automatizar. Setor automóvel, impacto social e IA.',
     items: [
       {
-        role: 'Founder & AI Strategist',
+        role: 'Founder',
         company: 'ImportaSeguro',
-        tag: 'Founder Project',
+        tag: 'Side Project',
         url: 'importaseguro.pt',
         period: 'JAN 2026 — PRESENTE',
         intro:
