@@ -285,11 +285,7 @@ export default function SkillsOrbit() {
       </div>
 
       <div
-        className={`relative z-10 md:w-[540px] md:h-[540px] ${activeSkill ? 'orbit-paused' : ''}`}
-        style={{
-          width: 'min(92vw, 360px)',
-          height: 'min(92vw, 360px)'
-        }}
+        className={`relative z-10 w-[min(92vw,360px)] h-[min(92vw,360px)] md:w-[540px] md:h-[540px] ${activeSkill ? 'orbit-paused' : ''}`}
       >
         {/* Center */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
