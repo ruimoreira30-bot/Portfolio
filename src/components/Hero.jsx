@@ -56,8 +56,22 @@ export default function Hero({ frames }) {
     if (!img) return
     ctx.clearRect(0, 0, cw, ch)
     ctx.drawImage(img, dx, dy, dw, dh)
+
+    // Global dark overlay for text legibility
     ctx.fillStyle = 'rgba(0,0,0,0.55)'
     ctx.fillRect(0, 0, cw, ch)
+
+    // Mask the AI-generation watermark in the bottom-right corner
+    const maskW = Math.min(cw * 0.22, 360)
+    const maskH = Math.min(ch * 0.12, 110)
+    const gx = cw - maskW
+    const gy = ch - maskH
+    const grad = ctx.createLinearGradient(gx, gy, cw, ch)
+    grad.addColorStop(0, 'rgba(0,0,0,0)')
+    grad.addColorStop(0.45, 'rgba(0,0,0,0.85)')
+    grad.addColorStop(1, 'rgba(0,0,0,1)')
+    ctx.fillStyle = grad
+    ctx.fillRect(gx, gy, maskW, maskH)
   }
 
   // Schedule one draw per animation frame, even if onUpdate fires more often
