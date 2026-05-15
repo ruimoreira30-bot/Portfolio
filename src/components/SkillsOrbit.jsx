@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Starfield from './Starfield.jsx'
@@ -82,37 +82,38 @@ const TechIcon = {
 
 gsap.registerPlugin(ScrollTrigger)
 
+// Ring 1 — Strategy (icons + labels only; descriptions come from i18n)
 const INNER = [
-  { Icon: Handshake, label: 'B2B Development', description: 'B2B Development — Strategy' },
-  { Icon: Globe2, label: 'International Partnerships', description: 'International Partnerships' },
-  { Icon: Workflow, label: 'Process Automation', description: 'Process Automation' },
-  { Icon: TrendingUp, label: 'Growth Ops', description: 'Growth Ops — Performance' }
+  { Icon: Handshake, label: 'B2B Development' },
+  { Icon: Globe2, label: 'International Partnerships' },
+  { Icon: Workflow, label: 'Process Automation' },
+  { Icon: TrendingUp, label: 'Growth Ops' }
 ]
 // Ring 2 — Technical
 const MIDDLE = [
-  { render: TechIcon.playwright, label: 'Playwright', description: 'Playwright — Scraping' },
-  { render: TechIcon.remotion, label: 'Remotion', description: 'Remotion — Video in code' },
-  { render: TechIcon.altair, label: 'ALTAIR', description: 'ALTAIR — Database' },
-  { render: TechIcon.figma, label: 'Figma', description: 'Figma — Design' },
-  { render: TechIcon.excel, label: 'Excel', description: 'Excel — Financial Modeling' },
-  { render: TechIcon.metaAds, label: 'Meta Ads', description: 'Meta Ads — Paid Social' },
-  { render: TechIcon.googleAds, label: 'Google Ads', description: 'Google Ads — Paid Search' },
-  { render: TechIcon.contentCreation, label: 'Content Creation', description: 'Content Creation — Multi-format' }
+  { render: TechIcon.playwright, label: 'Playwright' },
+  { render: TechIcon.remotion, label: 'Remotion' },
+  { render: TechIcon.altair, label: 'ALTAIR' },
+  { render: TechIcon.figma, label: 'Figma' },
+  { render: TechIcon.excel, label: 'Excel' },
+  { render: TechIcon.metaAds, label: 'Meta Ads' },
+  { render: TechIcon.googleAds, label: 'Google Ads' },
+  { render: TechIcon.contentCreation, label: 'Content Creation' }
 ]
 // Ring 3 — AI
 const OUTER = [
-  { render: AIIcon.n8n, label: 'n8n', description: 'n8n — Workflow Automation' },
-  { render: AIIcon.cursor, label: 'Cursor', description: 'Cursor — AI Editor' },
-  { render: AIIcon.claudeCode, label: 'Claude Code', description: 'Claude Code — Pair Programming' },
-  { render: AIIcon.nanoBanana, label: 'Nano Banana', description: 'Nano Banana — Image Generation' },
-  { render: AIIcon.googleFlow, label: 'Google Flow', description: 'Google Flow — AI Video' },
-  { render: AIIcon.suno, label: 'Suno.AI', description: 'Suno — AI Music' },
-  { render: AIIcon.elevenLabs, label: 'ElevenLabs', description: 'ElevenLabs — AI Voice' },
-  { render: AIIcon.deepSeek, label: 'DeepSeek', description: 'DeepSeek — Open-source LLM' },
-  { render: AIIcon.perplexity, label: 'Perplexity', description: 'Perplexity — AI Search' },
-  { render: AIIcon.higgsField, label: 'HiggsField', description: 'HiggsField — AI Video' },
-  { render: AIIcon.manus, label: 'Manus.ai', description: 'Manus.ai — AI Agent' },
-  { render: AIIcon.openai, label: 'OpenAI', description: 'OpenAI — GPT & APIs' }
+  { render: AIIcon.n8n, label: 'n8n' },
+  { render: AIIcon.cursor, label: 'Cursor' },
+  { render: AIIcon.claudeCode, label: 'Claude Code' },
+  { render: AIIcon.nanoBanana, label: 'Nano Banana' },
+  { render: AIIcon.googleFlow, label: 'Google Flow' },
+  { render: AIIcon.suno, label: 'Suno.AI' },
+  { render: AIIcon.elevenLabs, label: 'ElevenLabs' },
+  { render: AIIcon.deepSeek, label: 'DeepSeek' },
+  { render: AIIcon.perplexity, label: 'Perplexity' },
+  { render: AIIcon.higgsField, label: 'HiggsField' },
+  { render: AIIcon.manus, label: 'Manus.ai' },
+  { render: AIIcon.openai, label: 'OpenAI' }
 ]
 
 function Ring({ items, radius, ringClass, counterClass, onItemHover, onItemLeave }) {
@@ -188,10 +189,19 @@ export default function SkillsOrbit() {
   const leaveTimer = useRef(null)
   const { t } = useTranslation()
 
-  // Merge static icon definitions with localized descriptions
-  const innerLocalized = INNER.map((it, i) => ({ ...it, description: t.skills.inner[i] }))
-  const middleLocalized = MIDDLE.map((it, i) => ({ ...it, description: t.skills.middle[i] }))
-  const outerLocalized = OUTER.map((it, i) => ({ ...it, description: t.skills.outer[i] }))
+  // Merge static icon definitions with localized descriptions — memoized per language
+  const innerLocalized = useMemo(
+    () => INNER.map((it, i) => ({ ...it, description: t.skills.inner[i] })),
+    [t]
+  )
+  const middleLocalized = useMemo(
+    () => MIDDLE.map((it, i) => ({ ...it, description: t.skills.middle[i] })),
+    [t]
+  )
+  const outerLocalized = useMemo(
+    () => OUTER.map((it, i) => ({ ...it, description: t.skills.outer[i] })),
+    [t]
+  )
 
   const onItemHover = (item) => {
     if (leaveTimer.current) {

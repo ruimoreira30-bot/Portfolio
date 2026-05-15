@@ -42,65 +42,6 @@ const PROJECT_META = [
   }
 ]
 
-const PROJECTS_LEGACY_UNUSED = [
-  {
-    id: 'autoimport',
-    badge: 'AI & Scraping',
-    headline: 'Car import simulator',
-    subhead: 'Pick a mobile.de listing and get the total cost in Portugal. In ten seconds.',
-    icon: Database,
-    bullets: [
-      { strong: 'Automated scraping', text: 'Pulls data from mobile.de — CO₂, displacement, base price — with no manual intervention.' },
-      { strong: 'AT-compliant', text: 'Cross-checks the data against the official ISV and IUC tables, including age-based depreciation coefficients.' },
-      { strong: 'Real total cost', text: 'Adds logistics, customs fees and commercial margin. Returns a number the client can trust.' }
-    ],
-    stack: ['Node.js', 'Playwright', 'Custom math engine'],
-    highlights: ['Data link', 'AT Compliance', 'Cost in seconds'],
-    metrics: [
-      { value: '30min → 10s', label: 'Time saved', animate: 'time' },
-      { value: '100%', label: 'Compliant with official tables', animate: 'percent', target: 100 }
-    ],
-    cta: { label: 'Visit Project', href: 'https://importaseguro.pt' }
-  },
-  {
-    id: 'projetoes',
-    badge: 'Strategy & Impact',
-    headline: 'Projetoes — Social support, digital infrastructure',
-    subhead: 'Helping launch a shelter for women in vulnerable situations.',
-    icon: Heart,
-    bullets: [
-      { strong: 'Funding applications', text: 'Identified and submitted applications to European and national funds to sustain the project.' },
-      { strong: 'International partnerships', text: 'Connected the initiative to foreign organisations to exchange best practices and shared energy.' },
-      { strong: 'Digital roadmap', text: 'Designed the online presence so the work can be visible and replicable.' }
-    ],
-    stack: ['EU Funds', 'Stakeholder management', 'Digital strategy'],
-    highlights: ['EU Funding', 'International Partnerships', 'Digital Roadmap'],
-    metrics: [
-      { value: 'Social Focus', label: 'Mission', animate: 'text' },
-      { value: 'B Corp Standards', label: 'Framework', animate: 'text' }
-    ],
-    cta: { label: 'Visit Project', href: 'https://projetoes.pt/', disabled: false }
-  },
-  {
-    id: 'proposal-engine',
-    badge: 'AI Automation',
-    headline: 'Commercial proposal engine',
-    subhead: 'Raw data in. A client-ready proposal PDF out.',
-    icon: Sparkles,
-    bullets: [
-      { strong: 'LLM structuring', text: 'Multiple real listings enter the pipeline and the models organise everything into a comparative table.' },
-      { strong: 'Auto generation', text: 'Node.js plus PDFKit produces the document with the branding already applied — no one opens Word.' },
-      { strong: 'Transparent costs', text: 'Clients see the full breakdown and compare cars side by side before deciding.' }
-    ],
-    stack: ['Claude API', 'Node.js', 'PDFKit', 'Multi-agent'],
-    highlights: ['Scraping + LLM', 'PDFKit Automation', 'Branded UI'],
-    metrics: [
-      { value: 'Multi-Agent', label: 'Architecture', animate: 'text' },
-      { value: 'Instant PDF', label: 'Output', animate: 'text' }
-    ],
-    cta: { label: 'View Demo', href: 'https://importaseguro.pt', disabled: false }
-  }
-]
 
 function AnimatedMetric({ metric, play }) {
   const ref = useRef(null)

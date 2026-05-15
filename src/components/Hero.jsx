@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useTranslation } from '../i18n/LanguageContext.jsx'
 
 gsap.registerPlugin(ScrollTrigger)
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
   window.__ST = ScrollTrigger
   window.__gsap = gsap
 }
@@ -16,6 +16,8 @@ export default function Hero({ frames }) {
   const canvasRef = useRef(null)
   const blockRefs = useRef([])
   const [frameIdx, setFrameIdx] = useState(0)
+  // eslint-disable-next-line no-unused-vars
+  const [resizeTick, setResizeTick] = useState(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -23,14 +25,9 @@ export default function Hero({ frames }) {
     const ctx = canvas.getContext('2d')
     const img = frames[Math.min(frameIdx, frames.length - 1)]
     if (!img) return
-    if (canvas.width === 0) {
-      canvas.width = window.innerWidth * window.devicePixelRatio
-      canvas.height = window.innerHeight * window.devicePixelRatio
-      canvas.style.width = window.innerWidth + 'px'
-      canvas.style.height = window.innerHeight + 'px'
-    }
     const cw = canvas.width
     const ch = canvas.height
+    if (cw === 0 || ch === 0) return
     const ir = img.width / img.height
     const cr = cw / ch
     let dw, dh, dx, dy
@@ -49,19 +46,26 @@ export default function Hero({ frames }) {
     ctx.drawImage(img, dx, dy, dw, dh)
     ctx.fillStyle = 'rgba(0,0,0,0.55)'
     ctx.fillRect(0, 0, cw, ch)
-  }, [frameIdx, frames])
+  }, [frameIdx, frames, resizeTick])
 
-  useEffect(() => {
-    const onResize = () => {
-      const canvas = canvasRef.current
-      if (!canvas) return
-      canvas.width = window.innerWidth * window.devicePixelRatio
-      canvas.height = window.innerHeight * window.devicePixelRatio
+  // Size the canvas before first paint so the first drawn frame is full-resolution
+  useLayoutEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const sizeCanvas = () => {
+      const dpr = window.devicePixelRatio || 1
+      canvas.width = window.innerWidth * dpr
+      canvas.height = window.innerHeight * dpr
       canvas.style.width = window.innerWidth + 'px'
       canvas.style.height = window.innerHeight + 'px'
-      setFrameIdx((i) => i)
     }
-    onResize()
+    sizeCanvas()
+    const onResize = () => {
+      sizeCanvas()
+      // Increment counter to force redraw with new size
+      setResizeTick((n) => n + 1)
+      if (typeof ScrollTrigger?.refresh === 'function') ScrollTrigger.refresh()
+    }
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
   }, [])
@@ -119,6 +123,9 @@ export default function Hero({ frames }) {
         t - DURATION / 2
       )
     })
+
+    // After triggers are set, refresh in case scroll position was already past start
+    ScrollTrigger.refresh()
 
     return () => {
       frameST.kill()

@@ -30,8 +30,9 @@ export default function LanguageSwitcher({ className = '' }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-haspopup="listbox"
+        aria-haspopup="menu"
         aria-expanded={open}
+        aria-label={`Language: ${lang}. Change site language.`}
         className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/20 transition-colors"
       >
         <Globe className="w-3.5 h-3.5 text-neutral-300" strokeWidth={1.75} />
@@ -60,7 +61,8 @@ export default function LanguageSwitcher({ className = '' }) {
 
       {open && (
         <div
-          role="listbox"
+          role="menu"
+          aria-label="Languages"
           className="absolute right-0 mt-2 min-w-[140px] rounded-xl overflow-hidden p-1.5 z-50"
           style={{
             background: 'rgba(0,0,0,0.6)',
@@ -76,8 +78,8 @@ export default function LanguageSwitcher({ className = '' }) {
             return (
               <button
                 key={code}
-                role="option"
-                aria-selected={active}
+                role="menuitemradio"
+                aria-checked={active}
                 onClick={() => {
                   setLang(code)
                   setOpen(false)
