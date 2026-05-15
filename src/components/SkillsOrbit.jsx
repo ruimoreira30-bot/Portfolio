@@ -340,17 +340,6 @@ export default function SkillsOrbit() {
               </div>
             )}
 
-            {/* Idle subtitle "Skills" under RM */}
-            {!activeSkill && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-5 whitespace-nowrap text-center">
-                <div
-                  className="font-display font-bold text-xs md:text-sm uppercase tracking-[0.4em]"
-                  style={{ color: '#00d4aa' }}
-                >
-                  {t.skills.centerIdle}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
