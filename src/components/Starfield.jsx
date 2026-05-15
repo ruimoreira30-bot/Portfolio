@@ -26,9 +26,9 @@ export default function Starfield({ className = '' }) {
 
       // Star layers (parallax-ready, but here static + twinkle)
       const layers = [
-        { count: Math.round((width * height) / 9000), rMin: 0.2, rMax: 0.6, alpha: 0.45, twinkle: 0.4 },
-        { count: Math.round((width * height) / 14000), rMin: 0.4, rMax: 1.0, alpha: 0.7, twinkle: 0.6 },
-        { count: Math.round((width * height) / 40000), rMin: 0.8, rMax: 1.6, alpha: 1.0, twinkle: 0.8 }
+        { count: Math.round((width * height) / 6000), rMin: 0.2, rMax: 0.6, alpha: 0.5, twinkle: 0.4 },
+        { count: Math.round((width * height) / 10000), rMin: 0.4, rMax: 1.0, alpha: 0.75, twinkle: 0.6 },
+        { count: Math.round((width * height) / 28000), rMin: 0.8, rMax: 1.8, alpha: 1.0, twinkle: 0.8 }
       ]
 
       stars = []
@@ -51,7 +51,7 @@ export default function Starfield({ className = '' }) {
         }
       })
 
-      // Subtle vignette only (no nebula band)
+      // Diffuse "Milky Way" — soft nebula clouds, no harsh diagonal band
       nebula = document.createElement('canvas')
       nebula.width = canvas.width
       nebula.height = canvas.height
@@ -60,9 +60,68 @@ export default function Starfield({ className = '' }) {
 
       const cx = width * 0.5
       const cy = height * 0.5
-      const vg = nctx.createRadialGradient(cx, cy, Math.min(width, height) * 0.3, cx, cy, Math.max(width, height) * 0.8)
+
+      // Use additive blending for the cloud layer so colours stack naturally
+      nctx.globalCompositeOperation = 'lighter'
+
+      // Cloud palette — teal-leaning with hints of deep blue and violet
+      const palette = [
+        'rgba(0, 212, 170, 0.085)',   // teal core
+        'rgba(0, 160, 220, 0.075)',   // cyan
+        'rgba(110, 90, 220, 0.065)',  // soft violet (no magenta band)
+        'rgba(40, 70, 180, 0.07)'     // deep galactic blue
+      ]
+
+      // ~14 large soft clouds scattered across the canvas, biased toward center
+      const cloudCount = 14
+      for (let i = 0; i < cloudCount; i++) {
+        // Slight bias toward the middle/upper half (galactic core feel)
+        const t = i / cloudCount
+        const angle = Math.random() * Math.PI * 2
+        const dist = Math.random() * Math.max(width, height) * 0.55
+        const x = cx + Math.cos(angle) * dist + (Math.random() - 0.5) * width * 0.15
+        const y = cy + Math.sin(angle) * dist * 0.75 + (Math.random() - 0.5) * height * 0.15
+        const r = Math.max(width, height) * (0.18 + Math.random() * 0.22)
+        const color = palette[i % palette.length]
+        const grad = nctx.createRadialGradient(x, y, 0, x, y, r)
+        grad.addColorStop(0, color)
+        grad.addColorStop(1, 'rgba(0,0,0,0)')
+        nctx.fillStyle = grad
+        nctx.beginPath()
+        nctx.arc(x, y, r, 0, Math.PI * 2)
+        nctx.fill()
+      }
+
+      // A handful of brighter star-cluster glints
+      const clusterCount = 6
+      for (let i = 0; i < clusterCount; i++) {
+        const x = Math.random() * width
+        const y = Math.random() * height
+        const r = 40 + Math.random() * 80
+        const grad = nctx.createRadialGradient(x, y, 0, x, y, r)
+        grad.addColorStop(0, 'rgba(180, 220, 255, 0.18)')
+        grad.addColorStop(0.4, 'rgba(120, 180, 255, 0.08)')
+        grad.addColorStop(1, 'rgba(0,0,0,0)')
+        nctx.fillStyle = grad
+        nctx.beginPath()
+        nctx.arc(x, y, r, 0, Math.PI * 2)
+        nctx.fill()
+      }
+
+      // Reset blend mode for the vignette pass
+      nctx.globalCompositeOperation = 'source-over'
+
+      // Vignette — keeps focus on the centre
+      const vg = nctx.createRadialGradient(
+        cx,
+        cy,
+        Math.min(width, height) * 0.3,
+        cx,
+        cy,
+        Math.max(width, height) * 0.85
+      )
       vg.addColorStop(0, 'rgba(0,0,0,0)')
-      vg.addColorStop(1, 'rgba(0,0,0,0.45)')
+      vg.addColorStop(1, 'rgba(0,0,0,0.55)')
       nctx.fillStyle = vg
       nctx.fillRect(0, 0, width, height)
     }
